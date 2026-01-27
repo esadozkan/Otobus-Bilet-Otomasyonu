@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="flatlaf-3.6.2-javadoc">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../flatlaf-3.6.2-javadoc.jar!/" />
+    </SOURCES>
+  </library>
+</component>
