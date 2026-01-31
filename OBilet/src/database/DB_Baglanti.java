@@ -7,10 +7,12 @@ import javax.swing.JOptionPane;
 public class DB_Baglanti {
     // veritabanı bilgileri
     // url: localhost:3306 - localde 3306 ıncı porttan bağlıyoz
-    // obilet_db - shema adımız
-    public  static final String db_url = "jdbc:mysql://localhost:3306/obilet_db?useSSL=false&serverTimezone=UTC";
-    public  static final String db_user = "root";  // mysql de belirlediğimiz user ile passwordu buraya yazmamaız gerek
-    public  static final String db_password = "root";
+    // test_db - shema adımız (Test için bunu yaptım)
+    // NOT: Yorumların orijinal kalsa da aşağıdaki adres artık Bulut Sunucudur.
+    public static final String db_url = "jdbc:mysql://sql7.freesqldatabase.com:3306/sql7815886?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Europe/Istanbul&useSSL=false";
+    public  static final String db_user = "sql7815886";  // mysql de belirlediğimiz user ile passwordu buraya yazmamaız gerek
+
+    public  static final String db_password = "VYWCN5B5iH";
 
     //yukarda static final kullandım çünkü bu bilgilerin ilerde değişmemmesi gerkeiyor ve her yerden doğru erişmemiz gerek ondan
 
@@ -37,4 +39,3 @@ public class DB_Baglanti {
         }
     }
 }
-

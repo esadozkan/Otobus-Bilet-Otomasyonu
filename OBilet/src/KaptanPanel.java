@@ -38,6 +38,9 @@ public class KaptanPanel extends JPanel {
     private final Color COLOR_BTN_MAVI = new Color(41, 128, 185);
     private final Color COLOR_BTN_KIRMIZI = new Color(231, 76, 60);
 
+    // EKLENDİ: GÖLGELENMEYİ ENGELLEYEN MAT RENK
+    private final Color COLOR_INPUT_BG = new Color(60, 70, 80);
+
     public KaptanPanel() {
         initUI();
     }
@@ -91,9 +94,21 @@ public class KaptanPanel extends JPanel {
         add(sol_panel, BorderLayout.CENTER);
 
         // --- SAĞ PANEL (FORM) ---
-        JPanel sag_panel = new JPanel(new GridBagLayout());
+        // DÜZELTME: Standart JPanel yerine paintComponent override edildi.
+        // Bu sayede arka plan her frame'de temizlenir, ghosting olmaz.
+        JPanel sag_panel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g); // Önceki boyamayı hazırla
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(30, 40, 50, 200)); // Yarı saydam koyu
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // Köşeleri yuvarlat
+                g2.dispose();
+            }
+        };
+        sag_panel.setOpaque(false); // Önemli: Şeffaflık için false olmalı
         sag_panel.setPreferredSize(new Dimension(320, 0));
-        sag_panel.setBackground(new Color(30, 40, 50, 200)); // Yarı saydam koyu
         sag_panel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -133,6 +148,11 @@ public class KaptanPanel extends JPanel {
         cmb_ehliyet = new JComboBox<>(ehliyetler);
         cmb_ehliyet.setPreferredSize(new Dimension(0, 40));
         cmb_ehliyet.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        // ComboBox MAT arka plan ayarı
+        cmb_ehliyet.setBackground(COLOR_INPUT_BG);
+        cmb_ehliyet.setForeground(Color.WHITE);
+        ((JComponent) cmb_ehliyet.getRenderer()).setOpaque(true);
+
         gbc.gridy = row++; sag_panel.add(cmb_ehliyet, gbc);
 
         // Butonlar
@@ -311,7 +331,7 @@ public class KaptanPanel extends JPanel {
         return lbl;
     }
 
-    // GÖLGELENMEYİ (GHOSTING) ÇÖZEN YENİ METOT BUDUR
+    // GÖLGELENME (GHOSTING) ÇÖZÜMÜ BURADA:
     private JTextField createStyledTextField() {
         JTextField txt = new JTextField(20) {
             @Override
@@ -319,16 +339,17 @@ public class KaptanPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // 1. Arka planı temiz bir şekilde boya (Hayalet görüntüyü siler)
-                g2.setColor(getBackground());
+                // DÜZELTME: Artık arka plan ŞEFFAF DEĞİL, MAT KOYU RENK
+                // Bu sayede eski yazıların üstü kapanır, ghosting biter.
+                g2.setColor(COLOR_INPUT_BG);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
 
-                // 2. Çerçeveyi çiz
-                g2.setColor(new Color(255, 255, 255, 50)); // İnce beyaz çerçeve
+                // Çerçeveyi çiz
+                g2.setColor(new Color(255, 255, 255, 50));
                 g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
 
                 g2.dispose();
-                super.paintComponent(g); // 3. Yazıyı yazdır
+                super.paintComponent(g);
             }
         };
 
@@ -337,10 +358,10 @@ public class KaptanPanel extends JPanel {
         txt.setForeground(Color.WHITE);
         txt.setCaretColor(Color.WHITE);
 
-        // Yarı saydam arka plan rengi (Artık elle boyandığı için sorun yapmaz)
-        txt.setBackground(new Color(255, 255, 255, 20));
+        // Arka planı kodla boyadığımız için buraya gerek yok ama tutarlılık için:
+        txt.setBackground(COLOR_INPUT_BG);
 
-        txt.setOpaque(false); // Swing'in standart boyamasını kapat
+        txt.setOpaque(false); // Köşelerin yuvarlak kalması için false, ama içi dolu boyanıyor.
         txt.setBorder(new EmptyBorder(0, 10, 0, 10));
 
         return txt;

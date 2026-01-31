@@ -40,6 +40,9 @@ public class MusteriPanel extends JPanel {
     private final Color COLOR_BTN_MAVI = new Color(41, 128, 185);
     private final Color COLOR_BTN_KIRMIZI = new Color(192, 57, 43);
 
+    // GHOSTING ÇÖZÜMÜ İÇİN EKLENEN MAT RENK
+    private final Color COLOR_INPUT_BG = new Color(60, 70, 80);
+
     public MusteriPanel() {
         initUI();
     }
@@ -53,16 +56,27 @@ public class MusteriPanel extends JPanel {
         JPanel sol_panel = new JPanel(new BorderLayout(0, 10));
         sol_panel.setOpaque(false); // Şeffaf
 
-        JPanel arama_paneli = new JPanel(new BorderLayout());
-        arama_paneli.setBackground(new Color(30, 40, 50, 200)); // Yarı saydam
+        // FIX: Manuel boyanan arama paneli
+        JPanel arama_paneli = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(30, 40, 50, 200)); // Yarı saydam koyu
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2.dispose();
+            }
+        };
+        arama_paneli.setOpaque(false); // Standart boyama kapalı
         arama_paneli.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JLabel lbl_ara = new JLabel("Müşteri Ara:  ");
         lbl_ara.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lbl_ara.setForeground(COLOR_TEXT);
 
-        txt_ara = new JTextField();
-        styleTextField(txt_ara); // Modern stil
+        // FIX: Yeni text field oluşturucu kullanıldı
+        txt_ara = createStyledTextField();
         txt_ara.putClientProperty("JTextField.placeholderText", "TC Kimlik veya İsim giriniz...");
 
         arama_paneli.add(lbl_ara, BorderLayout.WEST);
@@ -138,9 +152,20 @@ public class MusteriPanel extends JPanel {
 
 
         // sağpanel
-        JPanel sag_panel = new JPanel(new GridBagLayout());
+        // FIX: Sağ panel manuel boyama ile güncellendi
+        JPanel sag_panel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(30, 40, 50, 200)); // Yarı saydam koyu
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2.dispose();
+            }
+        };
+        sag_panel.setOpaque(false); // Standart boyama kapalı
         sag_panel.setPreferredSize(new Dimension(340, 0));
-        sag_panel.setBackground(new Color(30, 40, 50, 200)); // Yarı saydam koyu
         sag_panel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -163,21 +188,30 @@ public class MusteriPanel extends JPanel {
         gbc.insets = new Insets(5, 0, 5, 0);
 
         gbc.gridy = row++; sag_panel.add(createLabel("Ad Soyad"), gbc);
-        txt_ad_soyad = new JTextField(20); styleTextField(txt_ad_soyad);
+        // FIX: Özel Text Field
+        txt_ad_soyad = createStyledTextField();
         gbc.gridy = row++; sag_panel.add(txt_ad_soyad, gbc);
 
         gbc.gridy = row++; sag_panel.add(createLabel("TC Kimlik No"), gbc);
-        txt_tc = new JTextField(20); styleTextField(txt_tc);
+        // FIX: Özel Text Field
+        txt_tc = createStyledTextField();
         gbc.gridy = row++; sag_panel.add(txt_tc, gbc);
 
         gbc.gridy = row++; sag_panel.add(createLabel("Telefon"), gbc);
-        txt_tel = new JTextField(20); styleTextField(txt_tel);
+        // FIX: Özel Text Field
+        txt_tel = createStyledTextField();
         gbc.gridy = row++; sag_panel.add(txt_tel, gbc);
 
         gbc.gridy = row++; sag_panel.add(createLabel("Cinsiyet"), gbc);
         cmb_cinsiyet = new JComboBox<>(new String[]{"Erkek", "Kadın"});
         cmb_cinsiyet.setPreferredSize(new Dimension(0, 35));
         cmb_cinsiyet.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        // ComboBox MAT Boyama
+        cmb_cinsiyet.setBackground(COLOR_INPUT_BG);
+        cmb_cinsiyet.setForeground(Color.WHITE);
+        ((JComponent) cmb_cinsiyet.getRenderer()).setOpaque(true);
+
         gbc.gridy = row++; sag_panel.add(cmb_cinsiyet, gbc);
 
         // butonlar
@@ -394,17 +428,36 @@ public class MusteriPanel extends JPanel {
         return l;
     }
 
-    private void styleTextField(JTextField txt) {
+    // YENİ EKLENEN METHOD: Ghosting Çözen Text Field
+    private JTextField createStyledTextField() {
+        JTextField txt = new JTextField(20) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Arka planı MAT renk ile boya (Silgi görevi görür)
+                g2.setColor(COLOR_INPUT_BG);
+                g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
+
+                // Çerçeve
+                g2.setColor(new Color(255, 255, 255, 50));
+                g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
+
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+
         txt.setPreferredSize(new Dimension(0, 35));
         txt.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        // Şeffaf arka plan, beyaz yazı
         txt.setForeground(Color.WHITE);
-        txt.setBackground(new Color(255, 255, 255, 20));
         txt.setCaretColor(Color.WHITE);
-        txt.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(255, 255, 255, 50)),
-                new EmptyBorder(0, 10, 0, 10)
-        ));
+        txt.setBackground(COLOR_INPUT_BG);
+        txt.setOpaque(false); // Custom painting için false, ama içi dolu.
+        txt.setBorder(new EmptyBorder(0, 10, 0, 10));
+
+        return txt;
     }
 
     private JButton createButton(String text, Color bg) {
